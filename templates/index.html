@@ -28,7 +28,7 @@
         }
         h2 { margin-bottom: 20px; color: #d63384; font-size: 1.5rem; }
         label { display: block; text-align: right; margin-bottom: 8px; font-weight: bold; }
-        select, input, button { 
+        select, input, button, .download-btn { 
             width: 100%; 
             padding: 14px; 
             margin-bottom: 20px; 
@@ -49,6 +49,24 @@
             transition: background 0.3s; 
         }
         button:hover { background-color: #0b5ed7; }
+        
+        /* تنسيقات منطقة النتيجة */
+        #result-area {
+            display: none; /* مخفي افتراضياً */
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+        }
+        audio { width: 100%; margin-bottom: 15px; outline: none; }
+        .download-btn {
+            display: block;
+            background-color: #198754;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .download-btn:hover { background-color: #157347; }
         #status { margin-top: 10px; font-size: 1rem; color: #ffc107; min-height: 24px;}
     </style>
 </head>
@@ -72,15 +90,29 @@
             
             <button type="submit">استخراج وفك الفلتر</button>
         </form>
+        
         <p id="status"></p>
+
+        <div id="result-area">
+            <h3>النتيجة:</h3>
+            <audio id="audio-player" controls></audio>
+            <a id="download-link" class="download-btn" download="reversed_audio.wav">⬇️ تحميل الصوت</a>
+        </div>
     </div>
 
     <script>
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
             const statusText = document.getElementById('status');
             const submitBtn = document.querySelector('button[type="submit"]');
+            const resultArea = document.getElementById('result-area');
+            const audioPlayer = document.getElementById('audio-player');
+            const downloadLink = document.getElementById('download-link');
             
+            // إعادة ضبط الواجهة عند بدء معالجة جديدة
+            resultArea.style.display = 'none';
+            audioPlayer.src = '';
             statusText.style.color = '#ffc107';
             statusText.innerText = "جاري استخراج الصوت والمعالجة... ⏳";
             submitBtn.disabled = true;
@@ -95,16 +127,19 @@
                 });
                 
                 if (response.ok) {
+                    // استلام الملف كـ Blob (كتلة بيانات)
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'reversed_audio.wav';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
+                    
+                    // وضع الرابط في مشغل الصوت وزر التحميل
+                    audioPlayer.src = url;
+                    downloadLink.href = url;
+                    
+                    // إظهار منطقة النتيجة
+                    resultArea.style.display = 'block';
+                    
                     statusText.style.color = '#28a745';
-                    statusText.innerText = "✅ تمت المعالجة والتحميل بنجاح!";
+                    statusText.innerText = "✅ تمت المعالجة بنجاح! يمكنك الاستماع الآن.";
                 } else {
                     const errorData = await response.json();
                     statusText.style.color = '#dc3545';
