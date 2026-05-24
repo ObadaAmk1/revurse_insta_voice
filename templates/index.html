@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>أداة عكس فلاتر إنستغرام</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 50px; background-color: #121212; color: white; text-align: center; }
+        .container { max-width: 500px; margin: auto; background: #222; padding: 30px; border-radius: 10px; }
+        select, input, button { width: 100%; padding: 10px; margin: 15px 0; border-radius: 5px; border: none; }
+        button { background-color: #5b51d8; color: white; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #4a41b5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>أداة فك فلاتر الصوت</h2>
+        <form id="uploadForm">
+            <label for="file">اختر ملف الصوت أو الفيديو:</label>
+            <input type="file" id="file" name="file" accept="audio/*,video/*" required>
+            
+            <label for="effect">اختر الفلتر المراد فكه:</label>
+            <select id="effect" name="effect">
+                <option value="Princess">Princess 🎀</option>
+                <option value="Chipmunk">Chipmunk 🐿️</option>
+                <option value="Demon">Demon 😈</option>
+                <option value="Pirate">Pirate 🏴‍☠️</option>
+                <option value="Alien">Alien 👽</option>
+                <option value="Robot">Robot 🤖</option>
+                <option value="Stadium">Stadium 📢</option>
+                <option value="Underwater">Underwater 🐟</option>
+                <option value="Wobble">Wobble 〰️</option>
+                <option value="Fishbowl">Fishbowl 🐠</option>
+                <option value="Autotune">Autotune 🎤</option>
+                <option value="Grandpa">Grandpa 🎵</option>
+                <option value="Grandma">Grandma 🎵</option>
+            </select>
+            
+            <button type="submit">معالجة وتحميل</button>
+        </form>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusText = document.getElementById('status');
+            statusText.innerText = "جاري المعالجة... يرجى الانتظار.";
+            
+            const formData = new FormData(e.target);
+            
+            const response = await fetch('/process', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'reversed_audio.wav';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                statusText.innerText = "تم التحميل بنجاح!";
+            } else {
+                statusText.innerText = "حدث خطأ أثناء المعالجة.";
+            }
+        });
+    </script>
+</body>
+</html>
